@@ -1,0 +1,147 @@
+{
+  "flashcards": [
+    {
+      "id": 1,
+      "error": "Estioma Carlos",
+      "correction": "Estimado Carlos",
+      "explanation": "Saludo formal en cartas."
+    },
+    {
+      "id": 2,
+      "error": "Hace mucho caro",
+      "correction": "Hace mucho calor",
+      "explanation": "Caro = $$$ / Calor = Temperatura ☀️"
+    },
+    {
+      "id": 3,
+      "error": "Voy comer",
+      "correction": "Voy a comer",
+      "explanation": "Perífrasis: Ir + a + Infinitivo."
+    },
+    {
+      "id": 4,
+      "error": "Despuesto",
+      "correction": "Después",
+      "explanation": "Adverbio de tiempo correcto."
+    },
+    {
+      "id": 5,
+      "error": "Manayunda",
+      "correction": "Mañana / Desayuno",
+      "explanation": "Palabra inexistente. Confusión fonética."
+    },
+    {
+      "id": 6,
+      "error": "Manga carto",
+      "correction": "Manga corta",
+      "explanation": "Concordancia: La manga (femenino)."
+    },
+    {
+      "id": 7,
+      "error": "Me lavanto",
+      "correction": "Me levanto",
+      "explanation": "Verbo levantarse (e > ie)."
+    },
+    {
+      "id": 8,
+      "error": "Soy en casa",
+      "correction": "Estoy en casa",
+      "explanation": "Estar para localización."
+    },
+    {
+      "id": 9,
+      "error": "El gente",
+      "correction": "La gente",
+      "explanation": "Gente es femenino."
+    },
+    {
+      "id": 10,
+      "error": "Yo escribo una carta",
+      "correction": "Correcto (Yo escribo)",
+      "explanation": "No hay error."
+    }
+  ],
+  "texts": [
+    {
+      "id": 1,
+      "content": "Estioma amigo, hoy voy escriber una carta sobre mi vacacion.",
+      "errors": [
+        { "word": "Estioma", "correction": "Estimado", "hint": "Saludo formal incorrecto" },
+        { "word": "escriber", "correction": "escribir", "hint": "Terminación incorrecta del infinitivo" },
+        { "word": "vacacion", "correction": "vacación", "hint": "Falta la tilde" }
+      ]
+    },
+    {
+      "id": 2,
+      "content": "En Vietnam hace mucho caro, así que llevo ropa de manga carto.",
+      "errors": [
+        { "word": "caro", "correction": "calor", "hint": "Confusión Léxica: Expensive vs Heat" },
+        { "word": "carto", "correction": "corta", "hint": "Concordancia femenino" }
+      ]
+    },
+    {
+      "id": 3,
+      "content": "Por la manayunda me lavanto a las ocho para ir a la playa.",
+      "errors": [
+        { "word": "manayunda", "correction": "mañana", "hint": "Palabra inventada" },
+        { "word": "lavanto", "correction": "levanto", "hint": "Concordancia verbal" }
+      ]
+    },
+    {
+      "id": 4,
+      "content": "Despuesto del desayuno, voy ver un museo en la ciudad.",
+      "errors": [
+        { "word": "Despuesto", "correction": "Después", "hint": "Error fosilizado" },
+        { "word": "ver", "correction": "a ver", "hint": "Falta preposición 'a'" }
+      ]
+    },
+    {
+      "id": 5,
+      "content": "Llevo un bolso gante para comprender cosas en el mercado.",
+      "errors": [
+        { "word": "gante", "correction": "grande", "hint": "Error fonético" },
+        { "word": "comprender", "correction": "comprar", "hint": "Confusión verbo: Understand vs Buy" }
+      ]
+    },
+    {
+      "id": 6,
+      "content": "Tengo mucha moneda para pagar el hotel anté de salir.",
+      "errors": [
+        { "word": "moneda", "correction": "dinero", "hint": "Vocabulario: Coin vs Money" },
+        { "word": "anté", "correction": "antes", "hint": "Ortografía básica" }
+      ]
+    },
+    {
+      "id": 7,
+      "content": "Mi viaja favorita es en dieciembre porque me gusta el sol.",
+      "errors": [
+        { "word": "viaja", "correction": "viaje", "hint": "El viaje (masculino)" },
+        { "word": "dieciembre", "correction": "diciembre", "hint": "Ortografía del mes" }
+      ]
+    },
+    {
+      "id": 8,
+      "content": "Las siete ceno en un restaurante. El comida es muy bueno.",
+      "errors": [
+        { "word": "Las", "correction": "A las", "hint": "Falta preposición horaria" },
+        { "word": "El", "correction": "La", "hint": "Género: La comida" },
+        { "word": "bueno", "correction": "buena", "hint": "Concordancia adjetivo" }
+      ]
+    },
+    {
+      "id": 9,
+      "content": "Siempre me ducha con agua fría porque soy muy calor.",
+      "errors": [
+        { "word": "ducha", "correction": "ducho", "hint": "Conjugación 1ª persona" },
+        { "word": "soy", "correction": "tengo", "hint": "Tener calor vs Ser calor" }
+      ]
+    },
+    {
+      "id": 10,
+      "content": "Quiero ir vacacion con mi amigo que hace fotos bonitas.",
+      "errors": [
+        { "word": "vacacion", "correction": "de vacaciones", "hint": "Expresión: Ir de vacaciones" }
+      ]
+    }
+  ]
+}
