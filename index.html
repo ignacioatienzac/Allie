@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Practicando Español con Allie</title>
+    <title>Juego de Español: Allie</title>
     <style>
         :root {
             --primary: #4A90E2;
             --secondary: #50E3C2;
-            --accent: #FF6B6B;
-            --bg: #F9F9F9;
-            --text: #333;
-            --correct: #2ECC71;
-            --wrong: #E74C3C;
+            --bg: #F4F7F6;
+            --text: #2C3E50;
+            --correct: #27ae60;
+            --wrong: #e74c3c;
+            --highlight: #f1c40f;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Verdana', sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
@@ -26,22 +26,22 @@
             align-items: center;
         }
 
-        h1, h2 { color: var(--primary); text-align: center; }
+        h1, h2 { color: var(--primary); text-align: center; margin-bottom: 10px; }
         
         .container {
             max-width: 800px;
             width: 100%;
             background: white;
-            padding: 20px;
+            padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             margin-bottom: 30px;
         }
 
-        /* Flashcards Styles */
+        /* --- FLASHCARDS --- */
         .flashcard-container {
             perspective: 1000px;
-            height: 200px;
+            height: 180px;
             margin: 20px 0;
             cursor: pointer;
         }
@@ -56,14 +56,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.5em;
+            font-size: 1.4em;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .flashcard.flipped {
-            transform: rotateY(180deg);
-        }
+        .flashcard.flipped { transform: rotateY(180deg); }
 
         .front, .back {
             position: absolute;
@@ -75,137 +73,118 @@
             justify-content: center;
             align-items: center;
             border-radius: 10px;
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
         }
 
-        .front {
-            background-color: var(--primary);
-            color: white;
-        }
+        .front { background-color: var(--primary); color: white; }
+        .back { background-color: white; color: var(--text); border: 2px solid var(--primary); transform: rotateY(180deg); }
 
-        .back {
-            background-color: white;
-            color: var(--text);
-            border: 2px solid var(--primary);
-            transform: rotateY(180deg);
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: var(--primary);
-            color: white;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background 0.3s;
-        }
-
-        button:hover { background-color: #357ABD; }
-        button:disabled { background-color: #ccc; cursor: not-allowed; }
-
-        /* Text Game Styles */
-        .game-area {
-            font-size: 1.2em;
-            line-height: 1.8;
-            margin: 20px 0;
-            padding: 20px;
-            background: #f0f4f8;
-            border-radius: 10px;
+        /* --- JUEGO PASO 2: DETECCIÓN --- */
+        .sentence-block {
+            background: #fff;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .word {
-            padding: 2px 4px;
+            padding: 3px 6px;
             border-radius: 4px;
             cursor: pointer;
             margin: 0 2px;
-            transition: all 0.2s;
+            transition: background 0.2s;
             display: inline-block;
         }
 
-        .word:hover { background-color: #e0e0e0; }
+        .word:hover { background-color: #eee; }
+        .word.selected { background-color: var(--highlight); color: #333; }
         
-        .word.selected {
-            background-color: var(--accent);
-            color: white;
+        /* Estados de validación */
+        .word.status-correct { background-color: var(--correct); color: white; cursor: default; }
+        .word.status-wrong { background-color: var(--wrong); color: white; text-decoration: line-through; }
+
+        /* --- JUEGO PASO 3: CORRECCIÓN --- */
+        #step3-area { display: none; animation: fadeIn 0.5s; }
+        
+        .correction-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #eee;
         }
 
-        .word.found-error {
-            background-color: var(--wrong); /* Rojo para indicar que era un error */
-            color: white;
+        .error-label {
+            color: var(--wrong);
+            font-weight: bold;
             text-decoration: line-through;
-            cursor: default;
-        }
-
-        .word.missed-error {
-            border-bottom: 2px dashed var(--wrong);
+            width: 40%;
         }
 
         .correction-input {
-            border: none;
-            border-bottom: 2px solid var(--correct);
+            width: 50%;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
             font-size: 1em;
-            color: var(--correct);
-            width: 100px;
-            margin-left: 5px;
-            outline: none;
-            background: transparent;
         }
 
-        .feedback {
+        .correction-input.valid { border-color: var(--correct); background-color: #e8f8f5; }
+        .correction-input.invalid { border-color: var(--wrong); background-color: #fce4ec; }
+
+        /* --- BOTONES Y FEEDBACK --- */
+        .controls { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            background-color: var(--primary);
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        button:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        button:disabled { background-color: #ccc; cursor: not-allowed; transform: none; }
+        
+        .feedback-box {
             margin-top: 15px;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 15px;
+            border-radius: 8px;
             text-align: center;
             font-weight: bold;
             display: none;
         }
+        .feedback-box.error { background-color: #fadbd8; color: #c0392b; }
+        .feedback-box.success { background-color: #d1f2eb; color: #27ae60; }
 
-        .feedback.success { background-color: #d4edda; color: #155724; display: block; }
-        .feedback.error { background-color: #f8d7da; color: #721c24; display: block; }
-
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background-color: #eee;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background-color: var(--secondary);
-            border-radius: 5px;
-            width: 0%;
-            transition: width 0.3s;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
     </style>
 </head>
 <body>
 
-    <h1>🇪🇸 Misión: Correctora de Español</h1>
-    <p style="text-align: center;">Ayuda a corregir los errores comunes y mejora tu nivel.</p>
-
+    <h1>🇪🇸 Misión: Corrección de Errores</h1>
+    
     <div class="container">
-        <h2>1. Flashcards de Repaso</h2>
+        <h2>1. Repaso Rápido</h2>
         <div class="flashcard-container" onclick="flipCard()">
             <div class="flashcard" id="flashcard">
                 <div class="front">
                     <p id="fc-front">Cargando...</p>
-                    <small>(Haz clic para girar)</small>
                 </div>
                 <div class="back">
                     <strong id="fc-back">...</strong>
-                    <p id="fc-expl" style="font-size: 0.8em; margin-top: 10px;"></p>
+                    <p id="fc-expl" style="font-size: 0.9em; margin-top: 10px;"></p>
                 </div>
             </div>
         </div>
@@ -215,279 +194,274 @@
         </div>
     </div>
 
-    <div class="container">
-        <h2>2. Detecta y Corrige</h2>
-        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <div class="container" id="game-container">
         
-        <p id="instruction-text"><strong>Paso 1:</strong> Haz clic sobre las palabras incorrectas.</p>
-        
-        <div class="game-area" id="game-text-area">
+        <div id="step2-area">
+            <h2>2. Encuentra los errores</h2>
+            <p>Hay 4 frases abajo. Haz clic sobre <strong>todas</strong> las palabras incorrectas.</p>
+            
+            <div id="sentences-wrapper">
+                </div>
+
+            <div class="feedback-box" id="step2-feedback"></div>
+
+            <div class="controls">
+                <button id="btn-check-step2" onclick="checkStep2()">Comprobar Selección</button>
             </div>
-
-        <div class="feedback" id="game-feedback"></div>
-
-        <div class="controls">
-            <button id="btn-action" onclick="checkSelection()">Comprobar Errores</button>
-            <button id="btn-next-text" onclick="loadNextText()" style="display:none; background-color: var(--secondary);">Siguiente Texto</button>
         </div>
+
+        <div id="step3-area">
+            <h2>3. ¡Ahora corrígelos!</h2>
+            <p>Escribe la forma correcta de los errores que encontraste.</p>
+
+            <div id="correction-list">
+                </div>
+
+            <div class="feedback-box" id="step3-feedback"></div>
+
+            <div class="controls">
+                <button id="btn-check-step3" onclick="checkStep3()">Validar Correcciones</button>
+                <button id="btn-restart" onclick="startNewRound()" style="display:none; background-color: var(--secondary);">🔄 Jugar otra ronda (Nuevas frases)</button>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // --- DATA LOAD (Fallback included) ---
-        let gameData = {
-            "flashcards": [],
-            "texts": []
-        };
-
-        // Fallback data in case JSON doesn't load (CORS issues local)
+        // --- DATA MANAGEMENT ---
+        let gameData = {};
+        // Fallback en caso de error CORS local
         const fallbackData = {
             "flashcards": [
                 {"id":1, "error":"Estioma Carlos", "correction":"Estimado Carlos", "explanation":"Saludo formal."},
-                {"id":2, "error":"Hace mucho caro", "correction":"Hace mucho calor", "explanation":"Caro = $$$ / Calor = ☀️"},
-                {"id":3, "error":"Voy comer", "correction":"Voy a comer", "explanation":"Ir + a + Infinitivo."},
-                {"id":4, "error":"Despuesto", "correction":"Después", "explanation":"Adverbio de tiempo."},
-                {"id":5, "error":"Manayunda", "correction":"Mañana / Desayuno", "explanation":"Palabra incorrecta."},
-                {"id":6, "error":"Manga carto", "correction":"Manga corta", "explanation":"Concordancia Femenina."},
-                {"id":7, "error":"Me lavanto", "correction":"Me levanto", "explanation":"Verbo levantarse."},
-                {"id":8, "error":"Soy en casa", "correction":"Estoy en casa", "explanation":"Estar = Ubicación."},
-                {"id":9, "error":"El gente", "correction":"La gente", "explanation":"Femenino."},
-                {"id":10, "error":"Yo escribo una carta", "correction":"Correcto", "explanation":"Sin errores."}
+                {"id":2, "error":"Hace mucho caro", "correction":"Hace mucho calor", "explanation":"Confusión Caro/Calor"},
+                {"id":3, "error":"Voy comer", "correction":"Voy a comer", "explanation":"Falta 'a'"},
+                {"id":4, "error":"Manayunda", "correction":"Mañana", "explanation":"Palabra inventada"}
             ],
-            "texts": [
-                {
-                    "id": 1, 
-                    "content": "Estioma amigo, hoy voy escriber una carta sobre mi vacacion.", 
-                    "errors": [
-                        {"word":"Estioma", "correction":"Estimado"}, 
-                        {"word":"escriber", "correction":"escribir"}, 
-                        {"word":"vacacion", "correction":"vacación"}
-                    ]
-                },
-                { "id": 2, "content": "En Vietnam hace mucho caro, así que llevo ropa de manga carto.", "errors": [{"word":"caro", "correction":"calor"}, {"word":"carto", "correction":"corta"}]},
-                { "id": 3, "content": "Por la manayunda me lavanto a las ocho para ir a la playa.", "errors": [{"word":"manayunda", "correction":"mañana"}, {"word":"lavanto", "correction":"levanto"}]},
-                { "id": 4, "content": "Despuesto del desayuno, voy ver un museo en la ciudad.", "errors": [{"word":"Despuesto", "correction":"Después"}, {"word":"ver", "correction":"a ver"}]},
-                { "id": 5, "content": "Llevo un bolso gante para comprender cosas en el mercado.", "errors": [{"word":"gante", "correction":"grande"}, {"word":"comprender", "correction":"comprar"}]},
-                { "id": 6, "content": "Tengo mucha moneda para pagar el hotel anté de salir.", "errors": [{"word":"moneda", "correction":"dinero"}, {"word":"anté", "correction":"antes"}]},
-                { "id": 7, "content": "Mi viaja favorita es en dieciembre porque me gusta el sol.", "errors": [{"word":"viaja", "correction":"viaje"}, {"word":"dieciembre", "correction":"diciembre"}]},
-                { "id": 8, "content": "Las siete ceno en un restaurante. El comida es muy bueno.", "errors": [{"word":"Las", "correction":"A las"}, {"word":"El", "correction":"La"}, {"word":"bueno", "correction":"buena"}]},
-                { "id": 9, "content": "Siempre me ducha con agua fría porque soy muy calor.", "errors": [{"word":"ducha", "correction":"ducho"}, {"word":"soy", "correction":"tengo"}]},
-                { "id": 10, "content": "Quiero ir vacacion con mi amigo que hace fotos bonitas.", "errors": [{"word":"vacacion", "correction":"de vacaciones"}]}
+            "sentences": [
+                { "id":1, "content": "Estioma amigo, hoy voy escriber una carta.", "errors": [{"word":"Estioma", "correction":"Estimado"}, {"word":"escriber", "correction":"escribir"}] },
+                { "id":2, "content": "En Vietnam hace mucho caro en verano.", "errors": [{"word":"caro", "correction":"calor"}] },
+                { "id":3, "content": "Llevo una camiseta de manga carto azul.", "errors": [{"word":"carto", "correction":"corta"}] },
+                { "id":4, "content": "Por la manayunda me lavanto a las ocho.", "errors": [{"word":"manayunda", "correction":"mañana"}, {"word":"lavanto", "correction":"levanto"}] },
+                { "id":5, "content": "Despuesto del desayuno voy ver un museo.", "errors": [{"word":"Despuesto", "correction":"Después"}, {"word":"ver", "correction":"a ver"}] },
+                { "id":6, "content": "Llevo un bolso gante para comprender.", "errors": [{"word":"gante", "correction":"grande"}, {"word":"comprender", "correction":"comprar"}] }
             ]
         };
 
-        // --- INIT ---
+        let currentBatch = []; // Las 4 frases actuales
+        let foundErrors = [];  // Los errores encontrados por el usuario para pasar al paso 3
+
         async function loadData() {
             try {
                 const response = await fetch('data.json');
-                if (!response.ok) throw new Error("JSON not found");
+                if (!response.ok) throw new Error("Error loading JSON");
                 gameData = await response.json();
-            } catch (error) {
-                console.log("Using fallback data due to fetch error (likely CORS):", error);
+            } catch (e) {
+                console.log("Usando datos de respaldo (Fallback)");
                 gameData = fallbackData;
             }
             initFlashcards();
-            initGame();
+            startNewRound();
         }
 
         window.onload = loadData;
 
-        // --- FLASHCARD LOGIC ---
+        // --- FLASHCARDS LOGIC (Simple) ---
         let currentCard = 0;
-        
-        function initFlashcards() {
-            renderCard();
-        }
-
+        function initFlashcards() { renderCard(); }
         function renderCard() {
-            const cardData = gameData.flashcards[currentCard];
-            document.getElementById('fc-front').textContent = cardData.error;
-            document.getElementById('fc-back').textContent = cardData.correction;
-            document.getElementById('fc-expl').textContent = cardData.explanation;
+            const card = gameData.flashcards[currentCard];
+            document.getElementById('fc-front').textContent = card.error;
+            document.getElementById('fc-back').textContent = card.correction;
+            document.getElementById('fc-expl').textContent = card.explanation;
             document.getElementById('flashcard').classList.remove('flipped');
         }
+        function flipCard() { document.getElementById('flashcard').classList.toggle('flipped'); }
+        function nextCard() { currentCard = (currentCard + 1) % gameData.flashcards.length; renderCard(); }
+        function prevCard() { currentCard = (currentCard - 1 + gameData.flashcards.length) % gameData.flashcards.length; renderCard(); }
 
-        function flipCard() {
-            document.getElementById('flashcard').classList.toggle('flipped');
-        }
+        // --- GAME LOGIC ---
 
-        function nextCard() {
-            if (currentCard < gameData.flashcards.length - 1) {
-                currentCard++;
-                renderCard();
-            } else {
-                currentCard = 0; // Loop
-                renderCard();
-            }
-        }
+        function startNewRound() {
+            // Reset UI
+            document.getElementById('step2-area').style.display = 'block';
+            document.getElementById('step3-area').style.display = 'none';
+            document.getElementById('btn-check-step2').disabled = false;
+            document.getElementById('step2-feedback').style.display = 'none';
+            document.getElementById('btn-restart').style.display = 'none';
+            document.getElementById('btn-check-step3').style.display = 'inline-block';
+            foundErrors = [];
 
-        function prevCard() {
-            if (currentCard > 0) {
-                currentCard--;
-                renderCard();
-            }
-        }
+            // 1. Pick 4 random sentences
+            const allSentences = gameData.sentences;
+            // Shuffle array safely
+            const shuffled = [...allSentences].sort(() => 0.5 - Math.random());
+            currentBatch = shuffled.slice(0, 4);
 
-        // --- TEXT GAME LOGIC ---
-        let currentTextIndex = 0;
-        let gameState = 'select'; // select -> correct -> finished
+            // 2. Render Step 2
+            const wrapper = document.getElementById('sentences-wrapper');
+            wrapper.innerHTML = '';
 
-        function initGame() {
-            loadText(0);
-        }
+            currentBatch.forEach(sentenceObj => {
+                const div = document.createElement('div');
+                div.className = 'sentence-block';
+                
+                // Split words strictly by spaces (simple for A1)
+                const words = sentenceObj.content.split(' ');
+                
+                words.forEach(word => {
+                    const span = document.createElement('span');
+                    span.textContent = word;
+                    span.className = 'word';
+                    // Store clean word for checking (remove punctuation)
+                    span.dataset.clean = word.replace(/[.,;]/g, '').toLowerCase();
+                    span.onclick = () => toggleSelect(span);
+                    div.appendChild(span);
+                });
 
-        function loadText(index) {
-            currentTextIndex = index;
-            gameState = 'select';
-            const textData = gameData.texts[index];
-            const area = document.getElementById('game-text-area');
-            const feedback = document.getElementById('game-feedback');
-            const btnAction = document.getElementById('btn-action');
-            const btnNext = document.getElementById('btn-next-text');
-            const instruction = document.getElementById('instruction-text');
-
-            area.innerHTML = '';
-            feedback.style.display = 'none';
-            feedback.className = 'feedback';
-            btnNext.style.display = 'none';
-            btnAction.style.display = 'inline-block';
-            btnAction.textContent = "Comprobar Errores";
-            btnAction.onclick = checkSelection;
-            instruction.innerHTML = '<strong>Paso 1:</strong> Haz clic sobre las palabras incorrectas.';
-
-            // Progress bar
-            const pct = ((index) / gameData.texts.length) * 100;
-            document.getElementById('progress').style.width = pct + '%';
-
-            // Split text and create spans
-            // Simple split by space, retaining punctuation requires regex but keeping simple for A1 text
-            // We'll strip punctuation for comparison but display it attached
-            const words = textData.content.split(' ');
-            
-            words.forEach((word, i) => {
-                const span = document.createElement('span');
-                span.textContent = word;
-                span.className = 'word';
-                span.dataset.index = i;
-                span.dataset.cleanWord = word.replace(/[.,,]/g, ''); // Store clean version for check
-                span.onclick = () => toggleSelect(span);
-                area.appendChild(span);
+                wrapper.appendChild(div);
             });
         }
 
         function toggleSelect(span) {
-            if (gameState !== 'select') return;
+            if (span.classList.contains('status-correct')) return; // Bloquear si ya está validado
             span.classList.toggle('selected');
         }
 
-        function checkSelection() {
-            const textData = gameData.texts[currentTextIndex];
+        function checkStep2() {
+            const feedback = document.getElementById('step2-feedback');
             const selectedSpans = document.querySelectorAll('.word.selected');
-            const allSpans = document.querySelectorAll('.word');
-            let correctSelections = 0;
-            let wrongSelections = 0;
-            let missedErrors = 0;
+            
+            // Collect all actual errors in current batch for validation
+            let allErrorsInBatch = [];
+            currentBatch.forEach(s => {
+                s.errors.forEach(e => allErrorsInBatch.push(e));
+            });
 
-            // 1. Validate Selections
-            // We need to match selected words against the errors list
-            const errorWords = textData.errors.map(e => e.word.toLowerCase());
+            let correctCount = 0;
+            let wrongSelectionCount = 0;
+            let errorsToCorrectNext = [];
 
-            // Check selected
+            // Check User Selections
             selectedSpans.forEach(span => {
-                const cleanText = span.dataset.cleanWord.toLowerCase();
-                // Basic matching: if the word is in the error list
-                // NOTE: This logic is simple. If "la" is an error twice, it might flag both. 
-                // For this level, exact string match is usually enough.
-                if (errorWords.includes(cleanText)) {
-                    correctSelections++;
+                const cleanWord = span.dataset.clean;
+                
+                // Check if this word is in the error list for the batch
+                // Note: Simple check. If word 'la' appears twice and one is error, this might flag both.
+                // For this A1 specific text, unique error words are assumed or context isn't checked deeply.
+                const match = allErrorsInBatch.find(e => e.word.toLowerCase() === cleanWord);
+
+                if (match) {
                     span.classList.remove('selected');
-                    span.classList.add('found-error');
+                    span.classList.add('status-correct'); // Green
+                    correctCount++;
+                    // Add to list for Step 3 if not added already
+                    if (!errorsToCorrectNext.some(e => e.word === match.word && e.correction === match.correction)) {
+                        errorsToCorrectNext.push(match);
+                    }
                 } else {
-                    wrongSelections++;
                     span.classList.remove('selected');
-                    // span.style.backgroundColor = 'transparent'; // Reset
+                    span.classList.add('status-wrong'); // Red (strike)
+                    // Auto-remove red status after 1 sec to let them try again? 
+                    // Or keep it. Let's keep it but allow re-clicking to remove class if needed, 
+                    // but simplest is just show it's wrong.
+                    setTimeout(() => span.classList.remove('status-wrong'), 1500);
+                    wrongSelectionCount++;
                 }
             });
 
-            // Check missed
-            let totalErrors = errorWords.length;
-            if (correctSelections < totalErrors) {
-                document.getElementById('game-feedback').textContent = `Has encontrado ${correctSelections} de ${totalErrors} errores. Sigue buscando o revisa falsos positivos.`;
-                document.getElementById('game-feedback').className = 'feedback error';
-                return; // Don't proceed yet
-            }
+            // Validation Logic
+            const totalErrors = allErrorsInBatch.length;
 
-            if (wrongSelections > 0) {
-                 document.getElementById('game-feedback').textContent = `Encontraste todos los errores, pero marcaste ${wrongSelections} palabras que estaban bien.`;
-                 document.getElementById('game-feedback').className = 'feedback error';
-            }
-
-            // If we found all errors (ignoring extra clicks for flow), move to Correction Phase
-            if (correctSelections === totalErrors) {
-                startCorrectionPhase();
+            if (wrongSelectionCount > 0) {
+                feedback.textContent = `Has marcado ${wrongSelectionCount} palabras que son correctas. Inténtalo de nuevo.`;
+                feedback.className = 'feedback-box error';
+                feedback.style.display = 'block';
+            } else if (correctCount < totalErrors) {
+                feedback.textContent = `Has encontrado ${correctCount} de ${totalErrors} errores. ¡Faltan algunos!`;
+                feedback.className = 'feedback-box error';
+                feedback.style.display = 'block';
+            } else {
+                // Success!
+                feedback.textContent = "¡Genial! Has encontrado todos los errores.";
+                feedback.className = 'feedback-box success';
+                feedback.style.display = 'block';
+                document.getElementById('btn-check-step2').disabled = true;
+                
+                // Save errors for Step 3
+                foundErrors = errorsToCorrectNext;
+                
+                // Trigger Step 3 after short delay
+                setTimeout(initStep3, 1000);
             }
         }
 
-        function startCorrectionPhase() {
-            gameState = 'correct';
-            const instruction = document.getElementById('instruction-text');
-            const btnAction = document.getElementById('btn-action');
-            const feedback = document.getElementById('game-feedback');
+        function initStep3() {
+            document.getElementById('step2-area').style.display = 'none';
+            const step3 = document.getElementById('step3-area');
+            const list = document.getElementById('correction-list');
+            const feedback = document.getElementById('step3-feedback');
             
+            step3.style.display = 'block';
             feedback.style.display = 'none';
-            instruction.innerHTML = '<strong>Paso 2:</strong> Escribe la palabra correcta en los recuadros.';
-            btnAction.textContent = "Validar Correcciones";
-            btnAction.onclick = validateCorrections;
+            list.innerHTML = '';
 
-            // Transform found errors into inputs
-            const errorSpans = document.querySelectorAll('.word.found-error');
-            errorSpans.forEach(span => {
+            if (foundErrors.length === 0) {
+                list.innerHTML = "<p>¡Qué raro! No había errores.</p>";
+                return;
+            }
+
+            foundErrors.forEach((err, index) => {
+                const item = document.createElement('div');
+                item.className = 'correction-item';
+                
+                const label = document.createElement('div');
+                label.className = 'error-label';
+                label.textContent = err.word;
+
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'correction-input';
-                input.dataset.original = span.dataset.cleanWord;
-                span.innerHTML = '';
-                span.appendChild(input);
+                input.placeholder = 'Escribe la corrección';
+                input.dataset.correctAnswer = err.correction;
+
+                item.appendChild(label);
+                item.appendChild(input);
+                list.appendChild(item);
             });
         }
 
-        function validateCorrections() {
-            const textData = gameData.texts[currentTextIndex];
+        function checkStep3() {
             const inputs = document.querySelectorAll('.correction-input');
             let allCorrect = true;
 
             inputs.forEach(input => {
-                const original = input.dataset.original.toLowerCase();
-                const userVal = input.value.trim().toLowerCase();
-                
-                // Find corresponding error in data
-                const errorObj = textData.errors.find(e => e.word.toLowerCase() === original);
-                
-                if (errorObj && userVal === errorObj.correction.toLowerCase()) {
-                    input.style.borderColor = '#2ECC71';
-                    input.style.color = '#2ECC71';
+                const answer = input.value.trim().toLowerCase();
+                const target = input.dataset.correctAnswer.toLowerCase();
+
+                if (answer === target) {
+                    input.classList.remove('invalid');
+                    input.classList.add('valid');
                     input.disabled = true;
                 } else {
-                    input.style.borderColor = '#E74C3C';
+                    input.classList.add('invalid');
                     allCorrect = false;
                 }
             });
 
+            const feedback = document.getElementById('step3-feedback');
             if (allCorrect) {
-                const feedback = document.getElementById('game-feedback');
-                feedback.textContent = "¡Perfecto! Todo corregido.";
-                feedback.className = 'feedback success';
-                document.getElementById('btn-action').style.display = 'none';
-                document.getElementById('btn-next-text').style.display = 'inline-block';
-            }
-        }
-
-        function loadNextText() {
-            if (currentTextIndex < gameData.texts.length - 1) {
-                loadText(currentTextIndex + 1);
+                feedback.textContent = "¡Excelente! Todo corregido.";
+                feedback.className = 'feedback-box success';
+                feedback.style.display = 'block';
+                
+                // Show Restart Button
+                document.getElementById('btn-check-step3').style.display = 'none';
+                document.getElementById('btn-restart').style.display = 'inline-block';
             } else {
-                alert("¡Has terminado todos los ejercicios! ¡Buen trabajo Allie!");
-                currentTextIndex = 0;
-                loadText(0);
+                feedback.textContent = "Hay errores en tus correcciones. Revisa los cuadros rojos.";
+                feedback.className = 'feedback-box error';
+                feedback.style.display = 'block';
             }
         }
 
