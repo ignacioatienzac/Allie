@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practicando Español con Allie</title>
+    <style>
+        :root {
+            --primary: #4A90E2;
+            --secondary: #50E3C2;
+            --accent: #FF6B6B;
+            --bg: #F9F9F9;
+            --text: #333;
+            --correct: #2ECC71;
+            --wrong: #E74C3C;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1, h2 { color: var(--primary); text-align: center; }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        /* Flashcards Styles */
+        .flashcard-container {
+            perspective: 1000px;
+            height: 200px;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .front {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .back {
+            background-color: white;
+            color: var(--text);
+            border: 2px solid var(--primary);
+            transform: rotateY(180deg);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--primary);
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s;
+        }
+
+        button:hover { background-color: #357ABD; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* Text Game Styles */
+        .game-area {
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f0f4f8;
+            border-radius: 10px;
+        }
+
+        .word {
+            padding: 2px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 2px;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .word:hover { background-color: #e0e0e0; }
+        
+        .word.selected {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .word.found-error {
+            background-color: var(--wrong); /* Rojo para indicar que era un error */
+            color: white;
+            text-decoration: line-through;
+            cursor: default;
+        }
+
+        .word.missed-error {
+            border-bottom: 2px dashed var(--wrong);
+        }
+
+        .correction-input {
+            border: none;
+            border-bottom: 2px solid var(--correct);
+            font-size: 1em;
+            color: var(--correct);
+            width: 100px;
+            margin-left: 5px;
+            outline: none;
+            background: transparent;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.success { background-color: #d4edda; color: #155724; display: block; }
+        .feedback.error { background-color: #f8d7da; color: #721c24; display: block; }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--secondary);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>🇪🇸 Misión: Correctora de Español</h1>
+    <p style="text-align: center;">Ayuda a corregir los errores comunes y mejora tu nivel.</p>
+
+    <div class="container">
+        <h2>1. Flashcards de Repaso</h2>
+        <div class="flashcard-container" onclick="flipCard()">
+            <div class="flashcard" id="flashcard">
+                <div class="front">
+                    <p id="fc-front">Cargando...</p>
+                    <small>(Haz clic para girar)</small>
+                </div>
+                <div class="back">
+                    <strong id="fc-back">...</strong>
+                    <p id="fc-expl" style="font-size: 0.8em; margin-top: 10px;"></p>
+                </div>
+            </div>
+        </div>
+        <div class="controls">
+            <button onclick="prevCard()">Anterior</button>
+            <button onclick="nextCard()">Siguiente</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>2. Detecta y Corrige</h2>
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+        
+        <p id="instruction-text"><strong>Paso 1:</strong> Haz clic sobre las palabras incorrectas.</p>
+        
+        <div class="game-area" id="game-text-area">
+            </div>
+
+        <div class="feedback" id="game-feedback"></div>
+
+        <div class="controls">
+            <button id="btn-action" onclick="checkSelection()">Comprobar Errores</button>
+            <button id="btn-next-text" onclick="loadNextText()" style="display:none; background-color: var(--secondary);">Siguiente Texto</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA LOAD (Fallback included) ---
+        let gameData = {
+            "flashcards": [],
+            "texts": []
+        };
+
+        // Fallback data in case JSON doesn't load (CORS issues local)
+        const fallbackData = {
+            "flashcards": [
+                {"id":1, "error":"Estioma Carlos", "correction":"Estimado Carlos", "explanation":"Saludo formal."},
+                {"id":2, "error":"Hace mucho caro", "correction":"Hace mucho calor", "explanation":"Caro = $$$ / Calor = ☀️"},
+                {"id":3, "error":"Voy comer", "correction":"Voy a comer", "explanation":"Ir + a + Infinitivo."},
+                {"id":4, "error":"Despuesto", "correction":"Después", "explanation":"Adverbio de tiempo."},
+                {"id":5, "error":"Manayunda", "correction":"Mañana / Desayuno", "explanation":"Palabra incorrecta."},
+                {"id":6, "error":"Manga carto", "correction":"Manga corta", "explanation":"Concordancia Femenina."},
+                {"id":7, "error":"Me lavanto", "correction":"Me levanto", "explanation":"Verbo levantarse."},
+                {"id":8, "error":"Soy en casa", "correction":"Estoy en casa", "explanation":"Estar = Ubicación."},
+                {"id":9, "error":"El gente", "correction":"La gente", "explanation":"Femenino."},
+                {"id":10, "error":"Yo escribo una carta", "correction":"Correcto", "explanation":"Sin errores."}
+            ],
+            "texts": [
+                {
+                    "id": 1, 
+                    "content": "Estioma amigo, hoy voy escriber una carta sobre mi vacacion.", 
+                    "errors": [
+                        {"word":"Estioma", "correction":"Estimado"}, 
+                        {"word":"escriber", "correction":"escribir"}, 
+                        {"word":"vacacion", "correction":"vacación"}
+                    ]
+                },
+                { "id": 2, "content": "En Vietnam hace mucho caro, así que llevo ropa de manga carto.", "errors": [{"word":"caro", "correction":"calor"}, {"word":"carto", "correction":"corta"}]},
+                { "id": 3, "content": "Por la manayunda me lavanto a las ocho para ir a la playa.", "errors": [{"word":"manayunda", "correction":"mañana"}, {"word":"lavanto", "correction":"levanto"}]},
+                { "id": 4, "content": "Despuesto del desayuno, voy ver un museo en la ciudad.", "errors": [{"word":"Despuesto", "correction":"Después"}, {"word":"ver", "correction":"a ver"}]},
+                { "id": 5, "content": "Llevo un bolso gante para comprender cosas en el mercado.", "errors": [{"word":"gante", "correction":"grande"}, {"word":"comprender", "correction":"comprar"}]},
+                { "id": 6, "content": "Tengo mucha moneda para pagar el hotel anté de salir.", "errors": [{"word":"moneda", "correction":"dinero"}, {"word":"anté", "correction":"antes"}]},
+                { "id": 7, "content": "Mi viaja favorita es en dieciembre porque me gusta el sol.", "errors": [{"word":"viaja", "correction":"viaje"}, {"word":"dieciembre", "correction":"diciembre"}]},
+                { "id": 8, "content": "Las siete ceno en un restaurante. El comida es muy bueno.", "errors": [{"word":"Las", "correction":"A las"}, {"word":"El", "correction":"La"}, {"word":"bueno", "correction":"buena"}]},
+                { "id": 9, "content": "Siempre me ducha con agua fría porque soy muy calor.", "errors": [{"word":"ducha", "correction":"ducho"}, {"word":"soy", "correction":"tengo"}]},
+                { "id": 10, "content": "Quiero ir vacacion con mi amigo que hace fotos bonitas.", "errors": [{"word":"vacacion", "correction":"de vacaciones"}]}
+            ]
+        };
+
+        // --- INIT ---
+        async function loadData() {
+            try {
+                const response = await fetch('data.json');
+                if (!response.ok) throw new Error("JSON not found");
+                gameData = await response.json();
+            } catch (error) {
+                console.log("Using fallback data due to fetch error (likely CORS):", error);
+                gameData = fallbackData;
+            }
+            initFlashcards();
+            initGame();
+        }
+
+        window.onload = loadData;
+
+        // --- FLASHCARD LOGIC ---
+        let currentCard = 0;
+        
+        function initFlashcards() {
+            renderCard();
+        }
+
+        function renderCard() {
+            const cardData = gameData.flashcards[currentCard];
+            document.getElementById('fc-front').textContent = cardData.error;
+            document.getElementById('fc-back').textContent = cardData.correction;
+            document.getElementById('fc-expl').textContent = cardData.explanation;
+            document.getElementById('flashcard').classList.remove('flipped');
+        }
+
+        function flipCard() {
+            document.getElementById('flashcard').classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            if (currentCard < gameData.flashcards.length - 1) {
+                currentCard++;
+                renderCard();
+            } else {
+                currentCard = 0; // Loop
+                renderCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentCard > 0) {
+                currentCard--;
+                renderCard();
+            }
+        }
+
+        // --- TEXT GAME LOGIC ---
+        let currentTextIndex = 0;
+        let gameState = 'select'; // select -> correct -> finished
+
+        function initGame() {
+            loadText(0);
+        }
+
+        function loadText(index) {
+            currentTextIndex = index;
+            gameState = 'select';
+            const textData = gameData.texts[index];
+            const area = document.getElementById('game-text-area');
+            const feedback = document.getElementById('game-feedback');
+            const btnAction = document.getElementById('btn-action');
+            const btnNext = document.getElementById('btn-next-text');
+            const instruction = document.getElementById('instruction-text');
+
+            area.innerHTML = '';
+            feedback.style.display = 'none';
+            feedback.className = 'feedback';
+            btnNext.style.display = 'none';
+            btnAction.style.display = 'inline-block';
+            btnAction.textContent = "Comprobar Errores";
+            btnAction.onclick = checkSelection;
+            instruction.innerHTML = '<strong>Paso 1:</strong> Haz clic sobre las palabras incorrectas.';
+
+            // Progress bar
+            const pct = ((index) / gameData.texts.length) * 100;
+            document.getElementById('progress').style.width = pct + '%';
+
+            // Split text and create spans
+            // Simple split by space, retaining punctuation requires regex but keeping simple for A1 text
+            // We'll strip punctuation for comparison but display it attached
+            const words = textData.content.split(' ');
+            
+            words.forEach((word, i) => {
+                const span = document.createElement('span');
+                span.textContent = word;
+                span.className = 'word';
+                span.dataset.index = i;
+                span.dataset.cleanWord = word.replace(/[.,,]/g, ''); // Store clean version for check
+                span.onclick = () => toggleSelect(span);
+                area.appendChild(span);
+            });
+        }
+
+        function toggleSelect(span) {
+            if (gameState !== 'select') return;
+            span.classList.toggle('selected');
+        }
+
+        function checkSelection() {
+            const textData = gameData.texts[currentTextIndex];
+            const selectedSpans = document.querySelectorAll('.word.selected');
+            const allSpans = document.querySelectorAll('.word');
+            let correctSelections = 0;
+            let wrongSelections = 0;
+            let missedErrors = 0;
+
+            // 1. Validate Selections
+            // We need to match selected words against the errors list
+            const errorWords = textData.errors.map(e => e.word.toLowerCase());
+
+            // Check selected
+            selectedSpans.forEach(span => {
+                const cleanText = span.dataset.cleanWord.toLowerCase();
+                // Basic matching: if the word is in the error list
+                // NOTE: This logic is simple. If "la" is an error twice, it might flag both. 
+                // For this level, exact string match is usually enough.
+                if (errorWords.includes(cleanText)) {
+                    correctSelections++;
+                    span.classList.remove('selected');
+                    span.classList.add('found-error');
+                } else {
+                    wrongSelections++;
+                    span.classList.remove('selected');
+                    // span.style.backgroundColor = 'transparent'; // Reset
+                }
+            });
+
+            // Check missed
+            let totalErrors = errorWords.length;
+            if (correctSelections < totalErrors) {
+                document.getElementById('game-feedback').textContent = `Has encontrado ${correctSelections} de ${totalErrors} errores. Sigue buscando o revisa falsos positivos.`;
+                document.getElementById('game-feedback').className = 'feedback error';
+                return; // Don't proceed yet
+            }
+
+            if (wrongSelections > 0) {
+                 document.getElementById('game-feedback').textContent = `Encontraste todos los errores, pero marcaste ${wrongSelections} palabras que estaban bien.`;
+                 document.getElementById('game-feedback').className = 'feedback error';
+            }
+
+            // If we found all errors (ignoring extra clicks for flow), move to Correction Phase
+            if (correctSelections === totalErrors) {
+                startCorrectionPhase();
+            }
+        }
+
+        function startCorrectionPhase() {
+            gameState = 'correct';
+            const instruction = document.getElementById('instruction-text');
+            const btnAction = document.getElementById('btn-action');
+            const feedback = document.getElementById('game-feedback');
+            
+            feedback.style.display = 'none';
+            instruction.innerHTML = '<strong>Paso 2:</strong> Escribe la palabra correcta en los recuadros.';
+            btnAction.textContent = "Validar Correcciones";
+            btnAction.onclick = validateCorrections;
+
+            // Transform found errors into inputs
+            const errorSpans = document.querySelectorAll('.word.found-error');
+            errorSpans.forEach(span => {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'correction-input';
+                input.dataset.original = span.dataset.cleanWord;
+                span.innerHTML = '';
+                span.appendChild(input);
+            });
+        }
+
+        function validateCorrections() {
+            const textData = gameData.texts[currentTextIndex];
+            const inputs = document.querySelectorAll('.correction-input');
+            let allCorrect = true;
+
+            inputs.forEach(input => {
+                const original = input.dataset.original.toLowerCase();
+                const userVal = input.value.trim().toLowerCase();
+                
+                // Find corresponding error in data
+                const errorObj = textData.errors.find(e => e.word.toLowerCase() === original);
+                
+                if (errorObj && userVal === errorObj.correction.toLowerCase()) {
+                    input.style.borderColor = '#2ECC71';
+                    input.style.color = '#2ECC71';
+                    input.disabled = true;
+                } else {
+                    input.style.borderColor = '#E74C3C';
+                    allCorrect = false;
+                }
+            });
+
+            if (allCorrect) {
+                const feedback = document.getElementById('game-feedback');
+                feedback.textContent = "¡Perfecto! Todo corregido.";
+                feedback.className = 'feedback success';
+                document.getElementById('btn-action').style.display = 'none';
+                document.getElementById('btn-next-text').style.display = 'inline-block';
+            }
+        }
+
+        function loadNextText() {
+            if (currentTextIndex < gameData.texts.length - 1) {
+                loadText(currentTextIndex + 1);
+            } else {
+                alert("¡Has terminado todos los ejercicios! ¡Buen trabajo Allie!");
+                currentTextIndex = 0;
+                loadText(0);
+            }
+        }
+
+    </script>
+</body>
+</html>
